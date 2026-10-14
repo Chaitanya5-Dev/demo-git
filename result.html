@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hibernate Knowledge Test | Your Results</title>
+  <style>
+    :root { --ink: #1d2925; --muted: #586761; --paper: #f5f7f2; --green: #176b52; --line: #dce4dd; --gold: #e4b952; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); font: 16px/1.6 "Trebuchet MS", Arial, sans-serif; }
+    header { padding: 30px 20px; color: white; background: #183d32; border-bottom: 5px solid var(--gold); }
+    header div, main { width: min(100% - 32px, 760px); margin: 0 auto; }
+    .eyebrow { margin: 0; color: #d4d9bd; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    h1 { margin: 5px 0 0; font-size: 30px; }
+    main { padding: 34px 0 55px; }
+    .result-panel { background: white; border: 1px solid var(--line); border-top: 4px solid var(--green); padding: clamp(22px, 5vw, 38px); }
+    .score { display: flex; align-items: baseline; gap: 9px; padding-bottom: 21px; border-bottom: 1px solid var(--line); }
+    .score strong { color: var(--green); font-size: 48px; line-height: 1; }
+    .score span { color: var(--muted); font-weight: 700; }
+    dl { display: grid; grid-template-columns: minmax(145px, 1fr) 2fr; gap: 13px 20px; margin: 22px 0; }
+    dt { color: var(--muted); }
+    dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+    .feedback { margin: 24px 0 0; padding: 16px 18px; background: #e7eee5; border-left: 4px solid var(--green); }
+    .actions { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 26px; }
+    a { color: var(--green); }
+    .button { display: inline-block; padding: 11px 18px; color: white; background: var(--green); text-decoration: none; font-weight: 700; }
+    .button:hover, .button:focus-visible { background: #104b3a; outline: 3px solid var(--gold); outline-offset: 2px; }
+    @media (max-width: 520px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 12px; } }
+  </style>
+</head>
+<body>
+  <header><div><p class="eyebrow">Hibernate Knowledge Test</p><h1>Your results</h1></div></header>
+  <main id="result-content" aria-live="polite">
+    <section class="result-panel" id="result-panel" hidden>
+      <div class="score"><strong id="rating"></strong><span>out of 10</span></div>
+      <dl>
+        <dt>Name</dt><dd id="name"></dd>
+        <dt>Email</dt><dd id="email"></dd>
+        <dt>Summary word count</dt><dd id="word-count"></dd>
+        <dt>Matching Hibernate keywords</dt><dd id="keyword-count"></dd>
+      </dl>
+      <p class="feedback" id="feedback"></p>
+      <div class="actions">
+        <a class="button" href="about.html">Return to the guide</a>
+        <a href="user%20details.html">Take the test again</a>
+      </div>
+    </section>
+    <section class="result-panel" id="guard-message">
+      <h2>Test not completed</h2>
+      <p>Please take the Hibernate test and complete successful verification before viewing results.</p>
+      <a class="button" href="about.html">Start the test</a>
+    </section>
+  </main>
+  <script>
+    const verified = sessionStorage.getItem("hibernateTestVerified") === "true";
+    const storedResult = sessionStorage.getItem("hibernateTestResult");
+
+    if (verified && storedResult) {
+      try {
+        const result = JSON.parse(storedResult);
+        if (typeof result.name !== "string" || typeof result.email !== "string" ||
+            !Number.isInteger(result.wordCount) || !Number.isInteger(result.matchingKeywords) ||
+            !Number.isInteger(result.rating)) throw new Error("Invalid result data");
+
+        document.getElementById("guard-message").hidden = true;
+        document.getElementById("result-panel").hidden = false;
+        document.getElementById("rating").textContent = result.rating;
+        document.getElementById("name").textContent = result.name;
+        document.getElementById("email").textContent = result.email;
+        document.getElementById("word-count").textContent = result.wordCount;
+        document.getElementById("keyword-count").textContent = `${result.matchingKeywords} of ${result.keywordTotal}`;
+
+        const feedback = result.rating === 10
+          ? "Excellent work: your summary covered all required Hibernate concepts."
+          : result.rating === 8
+            ? "Good effort: your detailed summary was over 70 words. Review the guide to include the remaining key concepts."
+            : result.rating === 7
+              ? "Good start: your summary was over 50 words. Review the guide and strengthen your coverage of the key concepts."
+              : "Keep learning: revisit the guide and include more of the important Hibernate concepts in your summary.";
+        document.getElementById("feedback").textContent = feedback;
+      } catch (error) {
+        sessionStorage.removeItem("hibernateTestVerified");
+        sessionStorage.removeItem("hibernateTestResult");
+      }
+    }
+  </script>
+</body>
+</html>

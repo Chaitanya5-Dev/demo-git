@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hibernate Knowledge Test | Your Details</title>
+  <style>
+    :root { --ink: #1d2925; --muted: #586761; --paper: #f5f7f2; --white: #fff; --green: #176b52; --line: #cbd7ce; --red: #a52d2d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(115deg, #e5eee7 0%, var(--paper) 55%, #f1eddf 100%); color: var(--ink); font: 16px/1.55 "Trebuchet MS", Arial, sans-serif; }
+    header { background: #183d32; color: white; padding: 28px 20px; border-bottom: 5px solid #e4b952; }
+    header div, main { width: min(100% - 32px, 690px); margin: 0 auto; }
+    header a { color: #d6e8d9; font-size: 14px; }
+    h1 { margin: 9px 0 0; font-size: 30px; }
+    main { padding: 34px 0 56px; }
+    .form-panel { background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--green); padding: clamp(22px, 5vw, 38px); }
+    .lead { margin: 0 0 25px; color: var(--muted); }
+    .field { margin: 0 0 21px; }
+    label { display: block; margin-bottom: 7px; font-weight: 700; }
+    input, textarea { width: 100%; border: 1px solid #aebdb3; border-radius: 2px; background: #fff; color: var(--ink); padding: 11px 12px; font: inherit; }
+    input:focus, textarea:focus { outline: 3px solid #b5d4c3; border-color: var(--green); }
+    textarea { min-height: 185px; resize: vertical; }
+    .hint { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .error { min-height: 20px; margin: 5px 0 0; color: var(--red); font-size: 13px; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 26px; }
+    button { border: 0; background: var(--green); color: white; padding: 12px 24px; font: 700 15px "Trebuchet MS", sans-serif; cursor: pointer; }
+    button:hover, button:focus-visible { background: #104b3a; outline: 3px solid #e4b952; outline-offset: 2px; }
+    .back { color: var(--green); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header><div><a href="about.html">← About Hibernate</a><h1>Your test details</h1></div></header>
+  <main>
+    <form class="form-panel" action="verification.jsp" method="post" id="test-form" novalidate>
+      <p class="lead">Enter your details and summarize the Hibernate concepts you learned.</p>
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" autocomplete="name" required pattern="[A-Za-z]{5,}" aria-describedby="name-hint name-error">
+        <p class="hint" id="name-hint">At least 5 English letters; no spaces, numbers, or symbols.</p>
+        <p class="error" id="name-error" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-error">
+        <p class="error" id="email-error" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for="summary">Hibernate summary</label>
+        <textarea id="summary" name="summary" required aria-describedby="summary-hint summary-error"></textarea>
+        <p class="hint" id="summary-hint">Describe the ideas from the guide in your own words.</p>
+        <p class="error" id="summary-error" aria-live="polite"></p>
+      </div>
+      <div class="actions">
+        <button type="submit">Submit test</button>
+        <a class="back" href="about.html">Review the Hibernate guide</a>
+      </div>
+    </form>
+  </main>
+  <script>
+    sessionStorage.removeItem("hibernateTestVerified");
+    sessionStorage.removeItem("hibernateTestResult");
+
+    const form = document.getElementById("test-form");
+    const nameField = document.getElementById("name");
+    const emailField = document.getElementById("email");
+    const summaryField = document.getElementById("summary");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const name = nameField.value;
+      const email = emailField.value.trim();
+      const summary = summaryField.value.trim();
+      const errors = {
+        name: /^[A-Za-z]{5,}$/.test(name) ? "" : "Enter at least 5 English letters.",
+        email: /^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/.test(email)
+          ? "" : "Please enter a valid email address.",
+        summary: summary ? "" : "Please enter your Hibernate summary."
+      };
+
+      document.getElementById("name-error").textContent = errors.name;
+      document.getElementById("email-error").textContent = errors.email;
+      document.getElementById("summary-error").textContent = errors.summary;
+      nameField.setAttribute("aria-invalid", String(Boolean(errors.name)));
+      emailField.setAttribute("aria-invalid", String(Boolean(errors.email)));
+      summaryField.setAttribute("aria-invalid", String(Boolean(errors.summary)));
+
+      if (Object.values(errors).some(Boolean)) return;
+
+      const wordCount = summary.split(/\s+/).length;
+      const normalizedSummary = summary.toLowerCase();
+      const requiredKeywords = [
+        "hibernate", "orm", "entity classes", "annotations", "sessionfactory",
+        "hql", "crud", "transactions", "database connectivity"
+      ];
+      const matchingKeywords = requiredKeywords.filter((keyword) => normalizedSummary.includes(keyword)).length;
+      const rating = matchingKeywords === requiredKeywords.length
+        ? 10
+        : wordCount > 70
+          ? 8
+          : wordCount > 50
+            ? 7
+            : 5;
+
+      sessionStorage.setItem("hibernateTestResult", JSON.stringify({
+        name,
+        email,
+        wordCount,
+        matchingKeywords,
+        keywordTotal: requiredKeywords.length,
+        rating
+      }));
+      sessionStorage.setItem("hibernateTestVerified", "true");
+      window.location.href = "result.html";
+    });
+  </script>
+</body>
+</html>
